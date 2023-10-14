@@ -10,6 +10,7 @@ import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.canvas.draw.SolidLine
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.Style
+import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.LineSeparator
 import com.itextpdf.layout.element.Link
@@ -64,10 +65,12 @@ class PdfDocumentGenerator(
             .setTextAlignment(TextAlignment.CENTER)
 
         //Top Section Table
-        val topSectionTable = Table(2)
+        val topSectionTable = Table(2, true)
             .setMarginLeft(15f)
             .setMarginRight(15f)
-            .setWidth(page.pageSize.width - 30 - 26f) //this will subtract the already set widths
+
+            //.setWidth(page.pageSize.width - 30 - 26f) //this will subtract the already set widths
+        //the largeTable = true also does the same thing
         topSectionTable.addCell(createNoBorderCell(invoiceText))
         topSectionTable.addCell(createNoBorderCell(payParagraph))
         topSectionTable.addCell(createNoBorderCell(dateText))
@@ -92,18 +95,68 @@ class PdfDocumentGenerator(
         val fromAddress = createLightTextParagraph(invoice.from.address).setTextAlignment(TextAlignment.LEFT)
         val toAddress = createLightTextParagraph(invoice.to.address).setTextAlignment(TextAlignment.RIGHT)
 
-        val peopleTable = Table(2)
-        peopleTable.addCell(from)
-        peopleTable.addCell(to)
-        peopleTable.addCell(fromName)
-        peopleTable.addCell(toName)
-        peopleTable.addCell(fromAddress)
-        peopleTable.addCell(toAddress)
+        val peopleTable = Table(2, true).apply {
+            setMarginLeft(15f)
+            setMarginRight(15f)
+            setMarginTop(50f)
+        }
+        peopleTable.addCell(createNoBorderCell(from))
+        peopleTable.addCell(createNoBorderCell(to))
+        peopleTable.addCell(createNoBorderCell(fromName))
+        peopleTable.addCell(createNoBorderCell(toName))
+        peopleTable.addCell(createNoBorderCell(fromAddress))
+        peopleTable.addCell(createNoBorderCell(toAddress))
 
         document.add(peopleTable)
 
 
+        //products
+        val description = createBoldTextParagraph("Description").setTextAlignment(TextAlignment.LEFT)
+        val rate = createBoldTextParagraph("Rate").setTextAlignment(TextAlignment.CENTER)
+        val qty = createBoldTextParagraph("QTY").setTextAlignment(TextAlignment.CENTER)
+        val subtotal = createBoldTextParagraph("SUBTOTAL").setTextAlignment(TextAlignment.RIGHT)
+
+        val productsTable = Table(4, true).apply {
+            setMarginLeft(15f)
+            setMarginRight(15f)
+            setMarginTop(50f)
+        }
+        productsTable.addCell(createProductTableCell(description))
+        productsTable.addCell(createProductTableCell(rate))
+        productsTable.addCell(createProductTableCell(qty))
+        productsTable.addCell(createProductTableCell(subtotal))
+
+        //looping over the products
+
+        val lighterBlack = DeviceRgb(64, 64, 64)
+        invoice.products.forEach {
+            val pdtDescription = createBoldTextParagraph(it.description, lighterBlack)
+                .setTextAlignment(TextAlignment.LEFT)
+            val pdtRate = createBoldTextParagraph("$${it.rate}", lighterBlack)
+                .setTextAlignment(TextAlignment.CENTER)
+            val pdtQty = createBoldTextParagraph(it.quantity.toString(), lighterBlack)
+                .setTextAlignment(TextAlignment.CENTER)
+            val pdtSubtotal = createBoldTextParagraph("$${it.rate * it.quantity}", lighterBlack)
+                .setTextAlignment(TextAlignment.RIGHT)
+
+            productsTable.addCell(createProductTableCell(pdtDescription))
+            productsTable.addCell(createProductTableCell(pdtRate))
+            productsTable.addCell(createProductTableCell(pdtQty))
+            productsTable.addCell(createProductTableCell(pdtSubtotal))
+        }
+
+        document.add(productsTable)
+
         document.close()
+    }
+
+    private fun createProductTableCell(paragraph: Paragraph): Cell {
+        return Cell().add(paragraph).apply {
+            setPaddingBottom(20f)
+            setPaddingTop(15f)
+            setBorder(null)
+            setBorderBottom(SolidBorder(DeviceRgb(204, 204, 204), 1f))
+        }
     }
 
     private fun createLightTextParagraph(text: String): Paragraph {

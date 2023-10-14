@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Button(onClick = { createPdf(this@MainActivity) }) {
+                        Button(onClick = {  }) {
                             Text(text = "Save")
                         }
                     }
@@ -45,19 +45,20 @@ class MainActivity : ComponentActivity() {
 }
 
 
+//This is the process of creating a pdf file
 
-private fun createPdf(context: Context) {
-    val outputFile = File(context.filesDir, "test.pdf")
-    val pdfWriter = PdfWriter(outputFile)
-    val pdfDocument = PdfDocument(pdfWriter)
-    val document = Document(pdfDocument, PageSize.A3)
-    pdfDocument.addNewPage()
-
-    document.add(
-        Paragraph("Hello world")
-    )
-
-    document.close()
-
-}
+//private fun createPdf(context: Context) {
+//    val outputFile = File(context.filesDir, "test.pdf")
+//    val pdfWriter = PdfWriter(outputFile)
+//    val pdfDocument = PdfDocument(pdfWriter)
+//    val document = Document(pdfDocument, PageSize.A3)
+//    pdfDocument.addNewPage()
+//
+//    document.add(
+//        Paragraph("Hello world")
+//    )
+//
+//    document.close()
+//
+//}
 

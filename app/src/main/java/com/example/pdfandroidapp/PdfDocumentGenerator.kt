@@ -1,6 +1,7 @@
 package com.example.pdfandroidapp
 
 import android.content.Context
+import com.itextpdf.kernel.colors.Color
 import com.itextpdf.kernel.colors.DeviceRgb
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
@@ -18,6 +19,7 @@ import com.itextpdf.layout.property.HorizontalAlignment
 import com.itextpdf.layout.property.Leading
 import com.itextpdf.layout.property.Property
 import com.itextpdf.layout.property.TextAlignment
+import com.itextpdf.layout.property.VerticalAlignment
 import java.io.File
 
 class PdfDocumentGenerator(
@@ -46,7 +48,7 @@ class PdfDocumentGenerator(
             .setFontSize(32f)
 
         //Date
-        val dateText = createTextParagraph(invoice.date)
+        val dateText = createLightTextParagraph(invoice.date)
 
 
         //pay button
@@ -79,14 +81,46 @@ class PdfDocumentGenerator(
 
         document.add(topSectionTable)
         document.add(line)
+
+        //seller/buyer information
+        val from = createLightTextParagraph("From")
+        val to = createLightTextParagraph("To").setTextAlignment(TextAlignment.RIGHT)
+
+        val fromName = createBoldTextParagraph(invoice.from.name).setTextAlignment(TextAlignment.LEFT)
+        val toName = createBoldTextParagraph(invoice.to.name).setTextAlignment(TextAlignment.RIGHT)
+
+        val fromAddress = createLightTextParagraph(invoice.from.address).setTextAlignment(TextAlignment.LEFT)
+        val toAddress = createLightTextParagraph(invoice.to.address).setTextAlignment(TextAlignment.RIGHT)
+
+        val peopleTable = Table(2)
+        peopleTable.addCell(from)
+        peopleTable.addCell(to)
+        peopleTable.addCell(fromName)
+        peopleTable.addCell(toName)
+        peopleTable.addCell(fromAddress)
+        peopleTable.addCell(toAddress)
+
+        document.add(peopleTable)
+
+
+        document.close()
     }
 
-    private fun createTextParagraph(text: String): Paragraph {
+    private fun createLightTextParagraph(text: String): Paragraph {
         val lightTextStyle = Style().apply {
             setFontSize(12f)
             setFontColor(DeviceRgb(166, 166, 166))
         }
         return Paragraph(text).addStyle(lightTextStyle)
+    }
+
+    private fun createBoldTextParagraph(text: String, color: Color = DeviceRgb.BLACK): Paragraph {
+        val boldTextStyle = Style().apply {
+            setFontSize(16f)
+            setFontColor(color)
+            setVerticalAlignment(VerticalAlignment.MIDDLE)
+        }
+        return Paragraph(text).addStyle(boldTextStyle)
     }
 
     private fun createNoBorderCell(paragraph: Paragraph): Cell {
